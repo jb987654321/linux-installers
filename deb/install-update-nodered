@@ -17,9 +17,7 @@
 # limitations under the License.
 
 NODE_VERSION=24
-tgta22=22.22.2   # armv6l latest from https://unofficial-builds.nodejs.org/download/release/
-# Extra nodes installed on Raspberry Pi only (see Pi-specific section below)
-EXTRANODES="node-red-node-pi-gpio@latest node-red-node-random@latest node-red-node-ping@latest node-red-contrib-play-audio@latest node-red-node-smooth@latest node-red-node-serialport@latest node-red-contrib-buffer-parser@latest"
+tgta22=22.22.3   # armv6l latest from https://unofficial-builds.nodejs.org/download/release/
 ARMV6="n"
 
 if [ ! -f /etc/debian_version ] || [ "$(uname)" == "Darwin" ]; then
@@ -67,8 +65,10 @@ Options:
   --help            display this help and exit
   --confirm-root    install as root without asking confirmation
   --confirm-install confirm installation without asking confirmation
-  --allow-low-ports add capability to bind to ports below 1024 (default is disallow)
+  --confirm-pi      confirm installation of PI specific nodes without asking confirmation
+  --skip-pi         skip installing PI specific nodes without asking confirmation
   --update-nodes    run npm update on existing installed nodes (within scope of package.json)
+  --allow-low-ports add capability to bind to ports below 1024 (default is disallow)
   --no-init         don't ask to initialise settings if they don't exist
   --on-diet         bypass DietPi exit and force install Node-RED on DietPi
   --nodered-user    specify the user to run as, useful for installing as sudo - e.g. --nodered-user=pi
@@ -99,6 +99,14 @@ if [ $# -gt 0 ]; then
         ;;
       --confirm-install)
         CONFIRM_INSTALL="y"
+        shift
+        ;;
+      --skip-pi)
+        CONFIRM_PI="n"
+        shift
+        ;;
+      --confirm-pi)
+        CONFIRM_PI="y"
         shift
         ;;
       --update-nodes)
@@ -293,6 +301,17 @@ if curl -I https://registry.npmjs.org/@node-red/util  >/dev/null 2>&1; then
     case $yn in
         [Yy]* )
             echo ""
+            EXTRANODES=""
+            EXTRAW="update"
+
+            response="${CONFIRM_PI}"
+            [ ! "${response}" ] && read -r -t 15 -p "Would you like to install the Pi-specific nodes ? [y/N] ? " response
+            if [[ "$response" =~ ^([yY])+$ ]]; then
+                # Extra nodes installed on Raspberry Pi only (see Pi-specific section below)
+                EXTRANODES="node-red-node-pi-gpio@latest node-red-node-random@latest node-red-node-ping@latest node-red-contrib-play-audio@latest node-red-node-smooth@latest node-red-node-serialport@latest node-red-contrib-buffer-parser@latest"
+                EXTRAW="install"
+            fi
+
             # this script assumes that $HOME is the folder of the user that runs node-red
             # that $NODERED_USER is the user name and the group name to use when running is the
             # primary group of that user
@@ -309,7 +328,7 @@ if curl -I https://registry.npmjs.org/@node-red/util  >/dev/null 2>&1; then
             if [[ "$FORCE_NODE" == "y" ]]; then
                 echo "  Removing any existing Node.js and npm... "
                 echo "Force node install option selected - will try to remove existing nodejs and npm first" | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
-                $SUDO apt purge nodejs npm 2>&1 | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
+                $SUDO apt -yq purge nodejs npm 2>&1 | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
                 $SUDO rm -rf /usr/local/bin/node* /usr/local/lib/node_modules/npm* /usr/bin/node* /usr/lib/node_modules/npm* 2>&1 | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
             fi
 
@@ -519,6 +538,9 @@ EOF
                     echo -ne "$CHAR\r"
                 fi
                 echo -ne "\n"
+                if [[ ! -z $EXTRANODES ]]; then
+                    npm i --save --no-progress --no-update-notifier --no-audit --no-fund $EXTRANODES 2>&1 | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
+                fi
 
                 # If armv6 then remove the bcrypt binary to workaround illegal instruction error
                 if uname -m | grep -q armv6l ; then
@@ -629,10 +651,12 @@ EOF
                         echo "Replace old rpi.gpio with lgpio" | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
                         $SUDO apt purge -y python3-rpi.gpio 2>&1 | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
                         $SUDO apt install -y python3-rpi-lgpio 2>&1 | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
-                        echo "Installing extra Pi nodes: $EXTRANODES :" | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
-                        echo -ne "  Installing Extra Pi nodes "
-                        npm i --save --no-progress --no-update-notifier --no-audit --no-fund $EXTRANODES 2>&1 | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
-                        echo -ne "          $CHAR\r\n"
+                        if [[ ! -z $EXTRANODES ]]; then
+                            echo "Installing extra Pi nodes: $EXTRANODES :" | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
+                            echo -ne "  Installing Extra Pi nodes "
+                            npm i --save --no-progress --no-update-notifier --no-audit --no-fund $EXTRANODES 2>&1 | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
+                            echo -ne "          $CHAR\r\n"
+                        fi
                     else
                         echo "Leaving old rpi.gpio" | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
                         $SUDO apt install -y python3-rpi.gpio 2>&1 | $SUDO tee -a /var/log/nodered-install.log >>/dev/null

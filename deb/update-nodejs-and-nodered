@@ -28,7 +28,7 @@ tgta18=18.20.8   # need armv6l latest from https://unofficial-builds.nodejs.org/
 tgtl18=18.20.8   # need x86 latest from https://unofficial-builds.nodejs.org/download/release/
 tgta20=20.20.2   # need armv6l latest from https://unofficial-builds.nodejs.org/download/release/
 tgtl20=20.20.2   # need x86 latest from https://unofficial-builds.nodejs.org/download/release/
-tgta22=22.22.2   # need armv6l latest from https://unofficial-builds.nodejs.org/download/release/
+tgta22=22.22.3   # need armv6l latest from https://unofficial-builds.nodejs.org/download/release/
 tgtl22=None
 tgta24=None
 tgtl24=None
@@ -50,8 +50,6 @@ Options:
   --on-diet         bypass DietPi exit and force install Node-RED on DietPi
   --nodered-user    specify the user to run as, useful for installing as sudo - e.g. --nodered-user=pi
   --nodered-version if not set, the latest version is used - e.g. --nodered-version="4.0.2"
-  --node16          if set, forces install of major version of nodejs 16 LTS
-  --node18          if set, forces install of major version of nodejs 18 LTS
   --node20          if set, forces install of major version of nodejs 20 LTS
   --node22          if set, forces install of major version of nodejs 22 LTS
   --node24          if set, forces install of major version of nodejs 24 LTS
