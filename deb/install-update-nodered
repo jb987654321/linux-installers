@@ -272,7 +272,6 @@ SUDOU="sudo -u $NODERED_USER"
 curl -I https://registry.npmjs.org/@node-red/util >/dev/null 2>&1
 CURL_RC=$?
 if [ $CURL_RC -eq 0 ]; then
-
     echo " "
     echo Node-RED update script for : $NODERED_USER@$(hostname)
     echo " "
@@ -299,6 +298,16 @@ if [ $CURL_RC -eq 0 ]; then
         echo -ne 'Please ensure it is running the current LTS version.\n'
         echo -ne 'Using n is NOT RECOMMENDED.\r\n\n'
         sleep 7
+    fi
+
+    if HAS_NODE && HAS_NPM; then
+        nv2=$(node -v 2>/dev/null)
+        np2=$(npm -v 2>/dev/null)
+        echo "Node.js $nv2 and Npm $np2 already installed" | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
+        echo -ne "Node.js $nv2 and Npm $np2 already installed.\n\n"
+    else
+        echo "Node.js and Npm not found - will try to install Node.js $NODE_VERSION" | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
+        echo -ne "Node.js and Npm not found - will try to install Node.js $NODE_VERSION\n\n"
     fi
 
     yn="${CONFIRM_INSTALL}"
@@ -342,8 +351,6 @@ if [ $CURL_RC -eq 0 ]; then
                 nv2=$(node -v 2>/dev/null)
                 np2=$(npm -v 2>/dev/null)
 
-                echo "Node.js $nv2 and Npm $np2 already installed" | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
-                echo "  Node.js $nv2 and Npm $np2 already installed."
                 if [[ "$ARMV6" == "y" ]]; then
                     echo "  There are no v24 or later builds for Arm v6 systems   "
                     echo "   -- Node.js v22 goes End Of Life in April 2027 --     "
