@@ -7,7 +7,7 @@ Both of the following commands use sudo (root) access to install Node-RED global
 The command line for installing on a Debian based OS is:
 
 ```
-bash <(curl -sL https://github.com/node-red/linux-installers/releases/latest/download/install-update-nodered)
+bash <(curl -sL https://github.com/node-red/linux-installers/releases/latest/download/install-update-nodered-deb)
 ```
 
 you should ensure you have the build tools installed if you are going to install extra nodes.
