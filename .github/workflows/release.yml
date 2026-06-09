@@ -16,11 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set version
       id: version
       run: |
@@ -29,16 +29,16 @@ jobs:
         else
           echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
         fi
-    
+
     - name: Create release directory
       run: mkdir -p release-assets
-    
+
     - name: Copy installer scripts
       run: |
-        cp deb/update-nodejs-and-nodered release-assets/update-nodejs-and-nodered-deb
+        cp deb/install-update-nodered release-assets/install-update-nodered-deb
         cp rpm/update-nodejs-and-nodered release-assets/update-nodejs-and-nodered-rpm
         chmod +x release-assets/update-nodejs-and-nodered-*
-    
+
     - name: Create release
       uses: softprops/action-gh-release@v1
       with:
@@ -46,24 +46,24 @@ jobs:
         name: Node-RED Linux Installers ${{ steps.version.outputs.VERSION }}
         body: |
           Node-RED Linux installer scripts for various distributions.
-          
+
           ## Installation
-          
+
           ### Debian, Ubuntu, Raspberry Pi OS
           ```bash
-          bash <(curl -sL https://github.com/node-red/linux-installers/releases/download/${{ steps.version.outputs.VERSION }}/update-nodejs-and-nodered-deb)
+          bash <(curl -sL https://github.com/node-red/linux-installers/releases/download/${{ steps.version.outputs.VERSION }}/install-update-nodered-deb)
           ```
-          
+
           ### Red Hat, Fedora, CentOS, Oracle Linux
           ```bash
           bash <(curl -sL https://github.com/node-red/linux-installers/releases/download/${{ steps.version.outputs.VERSION }}/update-nodejs-and-nodered-rpm)
           ```
-          
+
           ## Changes
           - Updated installer scripts
           - See commit history for detailed changes
         files: |
-          release-assets/update-nodejs-and-nodered-deb
+          release-assets/install-update-nodered-deb
           release-assets/update-nodejs-and-nodered-rpm
         draft: false
         prerelease: false
