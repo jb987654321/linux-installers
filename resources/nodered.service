@@ -18,8 +18,8 @@ Environment="NODE_OPTIONS=--max_old_space_size=512"
 EnvironmentFile=-/home/pi/.node-red/environment
 # uncomment and edit next line if you need an http proxy
 #Environment="HTTP_PROXY=my.httpproxy.server.address"
-# uncomment the next line for a more verbose log output
-#Environment="NODE_RED_OPTIONS=-v"
+# change the following line to be =-v for a more verbose log output
+Environment="NODE_RED_OPTIONS="
 # uncomment next line if you need to wait for time sync before starting
 #ExecStartPre=/bin/bash -c '/bin/journalctl -b -u systemd-timesyncd | /bin/grep -q "systemd-timesyncd.* Synchronized to time server"'
 
