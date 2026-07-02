@@ -305,6 +305,23 @@ if [ $CURL_RC -eq 0 ]; then
         np2=$(npm -v 2>/dev/null)
         echo "Node.js $nv2 and Npm $np2 already installed" | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
         echo -ne "Node.js $nv2 and Npm $np2 already installed.\n\n"
+
+        # Decide whether the currently installed Node.js needs upgrading
+        # because it is older than the minimum supported version of 22.9.0
+        NV_MAJOR=$(echo "$nv2" | sed 's/^v//' | cut -d '.' -f1)
+        NV_MINOR=$(echo "$nv2" | sed 's/^v//' | cut -d '.' -f2)
+        NEEDS_UPGRADE="n"
+        if [[ "$NV_MAJOR" -lt 22 ]] || { [[ "$NV_MAJOR" -eq 22 ]] && [[ "${NV_MINOR:-0}" -lt 9 ]]; }; then
+            NEEDS_UPGRADE="y"
+        fi
+        if [[ "$NEEDS_UPGRADE" == "y" && "$FORCE_NODE" != "y" ]]; then
+            echo "Installed nodejs $nv2 is below the minimum of 22.9.0 - will remove and install new version" | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
+            echo " "
+            echo "Node-RED requires Nodejs 22.9.0 or later - you have $nv2"
+            echo "Will attempt to remove the existing Node.js and install $NODE_VERSION."
+            echo " "
+            FORCE_NODE="y"
+        fi
     else
         echo "Node.js and Npm not found - will try to install Node.js $NODE_VERSION" | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
         echo -ne "Node.js and Npm not found - will try to install Node.js $NODE_VERSION\n\n"
@@ -428,6 +445,7 @@ if [ $CURL_RC -eq 0 ]; then
 
                     # use the official script to install for other debian platforms
                     $SUDO rm -rf /etc/apt/sources.list.d/nodesource.list 2>&1 | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
+                    $SUDO rm -rf /etc/apt/sources.list.d/nodesource.sources 2>&1 | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
                     $SUDO apt install -y ca-certificates curl gnupg 2>&1 | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
                     $SUDO mkdir -p /etc/apt/keyrings 2>&1 | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
                     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | $SUDOE gpg --batch --yes --dearmor -o /etc/apt/keyrings/nodesource.gpg 2>&1 | $SUDO tee -a /var/log/nodered-install.log >>/dev/null
