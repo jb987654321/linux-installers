@@ -435,7 +435,7 @@ if [ $CURL_RC -eq 0 ]; then
                     fi
 
                     # Install nodejs for all other platforms
-                    echo "  No Node.js detected - will try to install Node.js $NODE_VERSION"
+                    echo "  Will try to install Node.js $NODE_VERSION"
                     echo -ne "  Install Node.js \033[5m_\033[0m"
 
                     # block debian nodejs install
