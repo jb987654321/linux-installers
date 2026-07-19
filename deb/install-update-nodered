@@ -337,7 +337,7 @@ if [ $CURL_RC -eq 0 ]; then
     fi
 
     if [[ "$FORCE_INSTALL" == "y" ]] ; then
-        echo "** WARNING the --force option will COMPLETELY OVERWRITE your .node-red directory **"
+        echo "** WARNING the --clean option will COMPLETELY OVERWRITE your .node-red directory **"
         echo
     fi
 
